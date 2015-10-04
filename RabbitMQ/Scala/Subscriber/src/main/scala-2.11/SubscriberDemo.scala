@@ -1,20 +1,17 @@
-import com.rabbitmq.client._
-import java.io.IOException
-
 import java.util.HashMap
-import java.nio.charset.StandardCharsets
-
-import play.api.libs.json._
-
-import MyImplicits._
-
+import com.rabbitmq.client._
+import scala.reflect.ClassTag
+import scala.runtime.RichInt
+import scala.reflect.runtime.universe._
+import play.api.libs.json.{JsValue, Json, Writes}
+import JsonImplicits ._
 
 
 object SubscriberDemo {
 
-  def main (args:Array[String]):Unit = {
-    val r = new SubscriberDemo ()
-    r.Receive
+  def main (args:Array[String]): Unit = {
+    val r = new SubscriberDemo()
+    r.Receive()
   }
 }
 
@@ -36,61 +33,41 @@ Lift.Json :  SBT was not happy
 class SubscriberDemo {
   val EXCHANGE_NAME = "logs"
 
-  def Receive () = {
+  def Receive() = {
 
-    //PRODUCER CODE TO REMOVE
-    val factory = new ConnectionFactory()
-    factory.setHost("localhost")
-    val connection = factory.newConnection()
-    val channel = connection.createChannel()
+      //PRODUCER CODE TO REMOVE
+      val factory = new ConnectionFactory()
+      factory.setHost("localhost")
+      val connection = factory.newConnection()
+      val channel = connection.createChannel()
 
-    channel.exchangeDeclare(EXCHANGE_NAME, "fanout")
+      channel.exchangeDeclare(EXCHANGE_NAME, "fanout")
+      val queueName = channel.queueDeclare().getQueue()
+      channel.queueBind(queueName, EXCHANGE_NAME, "")
 
-    for (i <- (0 to 100)) {
+      val typelookup = new HashMap[Int, JsValue => RabbitJsonMessage]()
+      typelookup.putIfAbsent(1,value =>
+      {
+          val person = Json.fromJson[Person](value).get
+          person.asInstanceOf[RabbitJsonMessage]
+      })
 
-      val person = new Person("named from scala " + i.toString(), i)
-      val message = Json.toJson(person)
-      val bytes =  message.toString().getBytes(StandardCharsets.UTF_8)
-      val headers = new HashMap[String,AnyRef]()
-      headers.putIfAbsent("type","1")
-
-
-      val props = new AMQP.BasicProperties.Builder().headers(headers)
-      channel.basicPublish(EXCHANGE_NAME,"",props.build() , bytes)
-      System.out.println(" [x] Sent '" + message + "'")
-      Thread.sleep(1000)
-    }
-    channel.close()
-    connection.close()
+      System.out.println(" [*] Waiting for messages. To exit press CTRL+C")
+      val consumer = new DefaultConsumer(channel) {
 
 
-    /*
-    JAVA BASED CONSUMER CODE TO WRITE ABOVE
-
-
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("localhost");
-    Connection connection = factory.newConnection();
-    Channel channel = connection.createChannel();
-
-    channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
-    String queueName = channel.queueDeclare().getQueue();
-    channel.queueBind(queueName, EXCHANGE_NAME, "");
-
-    System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
-
-    Consumer consumer = new DefaultConsumer(channel) {
-      @Override
-      public void handleDelivery(String consumerTag, Envelope envelope,
-                                 AMQP.BasicProperties properties, byte[] body) throws IOException {
-        String message = new String(body, "UTF-8");
-        System.out.println(" [x] Received '" + message + "'");
+      override def handleDelivery(consumerTag: String, envelope: Envelope, properties: AMQP.BasicProperties, body: scala.Array[scala.Byte] ) =
+      {
+          val typeToLookup = properties.getHeaders().get("type").toString().toInt
+          val jsonConverter = typelookup.get(typeToLookup)
+          val messageBody = new String(body, "UTF-8")
+          val jsonObject = Json.parse(messageBody)
+          val person = jsonConverter(jsonObject).asInstanceOf[Person]
+          System.out.println(" [x] Received '" + person + "'");
       }
-    };
-    channel.basicConsume(queueName, true, consumer);
-  }
 
-     */
+    }
+    channel.basicConsume(queueName, true, consumer)
 
   }
 }

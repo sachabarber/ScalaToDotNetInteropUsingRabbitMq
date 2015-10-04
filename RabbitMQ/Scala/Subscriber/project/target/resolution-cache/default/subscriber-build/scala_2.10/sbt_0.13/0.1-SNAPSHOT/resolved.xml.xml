@@ -4,7 +4,7 @@
 		module="subscriber-build"
 		revision="0.1-SNAPSHOT"
 		status="integration"
-		publication="20150929195128"
+		publication="20150930062945"
 		e:sbtVersion="0.13" e:scalaVersion="2.10"
 	>
 		<description>

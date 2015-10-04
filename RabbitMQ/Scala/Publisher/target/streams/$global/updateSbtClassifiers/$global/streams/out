@@ -703,9 +703,9 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#test-agent;0.13.8!test-agent.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#test-interface;1.0!test-interface.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#apply-macro;0.13.8!apply-macro.jar
-[debug] :: resolution report :: resolve 559ms :: artifacts dl 40ms
-[debug] 	report for default#publisher$sbt_2.11;1.0 default produced in C:\Users\sacha\Desktop\JavaToDotNetInteropUsingRabbitMq\RabbitMQ\Scala\Publisher\target\resolution-cache\reports\default-publisher$sbt_2.11-default.xml
-[debug] 	resolve done (559ms resolve - 40ms download)
+[debug] :: resolution report :: resolve 3979ms :: artifacts dl 72ms
+[debug] 	report for default#publisher$sbt_2.11;1.0 default produced in C:\Users\sacha\Desktop\ScalaToDotNetInteropUsingRabbitMq\RabbitMQ\Scala\Publisher\target\resolution-cache\reports\default-publisher$sbt_2.11-default.xml
+[debug] 	resolve done (3979ms resolve - 72ms download)
 [debug] Using inline dependencies specified in Scala.
 [debug] :: resolving dependencies :: default#publisher$sources_2.11;1.0
 [debug] 	confs: [default]
@@ -1069,6 +1069,6 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#precompiled-2_8_2;0.13.8!precompiled-2_8_2.jar(src)
 [debug] 	[NOT REQUIRED] org.scala-sbt#precompiled-2_9_2;0.13.8!precompiled-2_9_2.jar(src)
 [debug] 	[NOT REQUIRED] org.scala-sbt#precompiled-2_9_3;0.13.8!precompiled-2_9_3.jar(src)
-[debug] :: resolution report :: resolve 212ms :: artifacts dl 69ms
-[debug] 	report for default#publisher$sources_2.11;1.0 default produced in C:\Users\sacha\Desktop\JavaToDotNetInteropUsingRabbitMq\RabbitMQ\Scala\Publisher\target\resolution-cache\reports\default-publisher$sources_2.11-default.xml
-[debug] 	resolve done (212ms resolve - 69ms download)
+[debug] :: resolution report :: resolve 370ms :: artifacts dl 102ms
+[debug] 	report for default#publisher$sources_2.11;1.0 default produced in C:\Users\sacha\Desktop\ScalaToDotNetInteropUsingRabbitMq\RabbitMQ\Scala\Publisher\target\resolution-cache\reports\default-publisher$sources_2.11-default.xml
+[debug] 	resolve done (370ms resolve - 102ms download)

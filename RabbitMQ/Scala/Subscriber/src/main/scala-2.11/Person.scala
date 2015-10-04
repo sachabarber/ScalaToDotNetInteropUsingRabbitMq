@@ -1,13 +1,23 @@
-import play.api.libs.json.{Json, Writes}
-import scala.runtime.RichInt
+import play.api.libs.json._
+import play.api.libs.json.{JsPath, Json, Writes, Reads}
+import play.api.libs.functional.syntax._
 
-case class Person(name: String, age: RichInt)
 
-object MyImplicits {
+
+trait RabbitJsonMessage
+case class Person(name: String, age: Int) extends  RabbitJsonMessage
+
+object JsonImplicits {
+
   implicit val personWrites = new Writes[Person] {
     def writes(person: Person) = Json.obj(
       "name" -> person.name,
-      "age" -> person.age.toInt
+      "age" -> person.age
     )
   }
+
+  implicit val personReads : Reads[Person] = (
+        (JsPath \ "name").read[String] and
+        (JsPath \ "age").read[Int]
+    )(Person.apply _)
 }

@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import play.api.libs.json._
 
-import MyImplicits._
+import JsonImplicits ._
 
 
 
@@ -48,9 +48,9 @@ class PublisherDemo {
 
      for (i <- (0 to 100)) {
 
-       val person = new Person("named from scala " + i.toString(), i)
+       val person = new Person("named from scala " + i.toString, i)
        val message = Json.toJson(person)
-       val bytes =  message.toString().getBytes(StandardCharsets.UTF_8)
+       val bytes =  message.toString.getBytes(StandardCharsets.UTF_8)
        val headers = new HashMap[String,AnyRef]()
        headers.putIfAbsent("type","1")
 

@@ -4,7 +4,7 @@
 		module="subscriber$sources_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20151002064404"
+		publication="20151008204343"
 	/>
 	<configurations>
 		<conf name="default" visibility="public" description=""/>

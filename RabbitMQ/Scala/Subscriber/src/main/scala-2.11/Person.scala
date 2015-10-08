@@ -1,4 +1,3 @@
-import play.api.libs.json._
 import play.api.libs.json.{JsPath, Json, Writes, Reads}
 import play.api.libs.functional.syntax._
 
@@ -6,6 +5,11 @@ import play.api.libs.functional.syntax._
 
 trait RabbitJsonMessage
 case class Person(name: String, age: Int) extends  RabbitJsonMessage
+{
+   override def toString : String = {
+    s"Name : $name, Age : $age"
+  }
+}
 
 object JsonImplicits {
 

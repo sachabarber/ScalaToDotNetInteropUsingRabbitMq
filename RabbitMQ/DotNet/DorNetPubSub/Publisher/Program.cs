@@ -48,7 +48,7 @@ namespace Publisher
         {
             Person p = new Person();
             p.Age = rand.Next(100);
-            p.Name = string.Format("Name_{0}", p.Age);
+            p.Name = string.Format("named from .NET {0}", p.Age);
             return JsonConvert.SerializeObject(p);
         }
     }

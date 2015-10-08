@@ -20,20 +20,6 @@ object PublisherDemo {
 
 
 
-/*
-JSON
-
-http://stackoverflow.com/questions/19436069/adding-play-json-library-to-sbt/20475410#20475410
-https://www.playframework.com/documentation/2.2.x/ScalaJson
-
-
-FAILED
-
-Spray.Json : Added extra "type" part into JSON
-Lift.Json :  SBT was not happy
-
- */
-
 class PublisherDemo {
   val EXCHANGE_NAME = "logs"
 

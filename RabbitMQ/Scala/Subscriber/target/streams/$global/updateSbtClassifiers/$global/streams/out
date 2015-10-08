@@ -703,9 +703,9 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#test-agent;0.13.8!test-agent.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#test-interface;1.0!test-interface.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#apply-macro;0.13.8!apply-macro.jar
-[debug] :: resolution report :: resolve 1925ms :: artifacts dl 78ms
+[debug] :: resolution report :: resolve 1477ms :: artifacts dl 85ms
 [debug] 	report for default#subscriber$sbt_2.11;1.0 default produced in C:\Users\sacha\Desktop\ScalaToDotNetInteropUsingRabbitMq\RabbitMQ\Scala\Subscriber\target\resolution-cache\reports\default-subscriber$sbt_2.11-default.xml
-[debug] 	resolve done (1925ms resolve - 78ms download)
+[debug] 	resolve done (1477ms resolve - 85ms download)
 [debug] Using inline dependencies specified in Scala.
 [debug] :: resolving dependencies :: default#subscriber$sources_2.11;1.0
 [debug] 	confs: [default]
@@ -1069,6 +1069,6 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#precompiled-2_8_2;0.13.8!precompiled-2_8_2.jar(src)
 [debug] 	[NOT REQUIRED] org.scala-sbt#precompiled-2_9_2;0.13.8!precompiled-2_9_2.jar(src)
 [debug] 	[NOT REQUIRED] org.scala-sbt#precompiled-2_9_3;0.13.8!precompiled-2_9_3.jar(src)
-[debug] :: resolution report :: resolve 377ms :: artifacts dl 188ms
+[debug] :: resolution report :: resolve 478ms :: artifacts dl 57ms
 [debug] 	report for default#subscriber$sources_2.11;1.0 default produced in C:\Users\sacha\Desktop\ScalaToDotNetInteropUsingRabbitMq\RabbitMQ\Scala\Subscriber\target\resolution-cache\reports\default-subscriber$sources_2.11-default.xml
-[debug] 	resolve done (377ms resolve - 188ms download)
+[debug] 	resolve done (478ms resolve - 57ms download)

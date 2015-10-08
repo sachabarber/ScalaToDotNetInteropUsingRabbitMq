@@ -1,0 +1,601 @@
+
+
+<div id="TOC"></div>
+<h1>Introduction</h1>
+<p>I have recently started a new job, where we are using a mixture of 
+technologies, lots of .NET, and the new stuff will be Scala based. We are using 
+Scala so that we can use the rich set of tools available for the JVM, such as 
+Apache Spark/Cassandra/ZooKeeper. We do however have a lot of .NET that exists 
+in a whole bunch of apps that we may need to communicate with.</p>
+<p>We are pretty sure that the new code will be based loosely around 
+MicroServices and will use some sort of Actor framework (maybe Akka and 
+Akka.NET). At the time of writing though Akka and Akka. NET do not talk to each 
+other, there is no &quot;On the wire&quot; protocol that has been written to support this. 
+I did read a very interesting post (link has been lost sorry) from one of the 
+main authors of Akka who stated this is something that they wanted to do, but 
+was a&nbsp; VERY large bit of work, and it would not be happening soon.</p>
+<p>So if you want to have some Akka code talk to Akka .NET code you are on your 
+own. So lets think about that for a minute, lets actually remove the need to use 
+an Actor framework from the picture all together. What are we trying to get to 
+happen. Essentially we want to to find a way for some &quot;event/message&quot; happening 
+in a Scala bit of code to trigger something in some .NET code.</p>
+<p>There are some cool libraries to allow Java classes to be used from .NET such 
+as <a href="http://www.ikvm.net/" target="_blank">IKVM</a>, and there is also a 
+nice project
+<a href="http://jnbridge.com/?utm_campaign=217739905&amp;utm_source=g&amp;utm_medium=15521160745&amp;utm_term=%2Bjnbridge&amp;gclid=CjwKEAjw4s2wBRDSnr2jwZenlkgSJABvFcwQ8xjaXaeFrVusLvpsAeU5ul_2CzD6UQdSq5k_6H33zBoCRS7w_wcB" target="_blank">
+jnbridge</a> which claims &quot;Bridge between anything Java and anything .NET, 
+anywhere&quot; on its main web page.</p>
+<p>I have seen <a href="http://www.ikvm.net/" target="_blank">IKVM</a> used, and 
+although it is a nice library, using java classes from .NET is not what our use 
+case needs. As for
+<a href="http://jnbridge.com/?utm_campaign=217739905&amp;utm_source=g&amp;utm_medium=15521160745&amp;utm_term=%2Bjnbridge&amp;gclid=CjwKEAjw4s2wBRDSnr2jwZenlkgSJABvFcwQ8xjaXaeFrVusLvpsAeU5ul_2CzD6UQdSq5k_6H33zBoCRS7w_wcB" target="_blank">
+jnbridge</a> I have not used this, but there was certainly one area which looked 
+cool which was to be able to use the Java Message Service to .NET, which you can 
+read about here :
+<a href="http://jnbridge.com/software/jms-adapter-for-net/overview" target="_blank">
+http://jnbridge.com/software/jms-adapter-for-net/overview</a></p>
+<p>That looked like it may have worked, but I wanted something a little lighter 
+and something I was more familiar with. I have used a number of different 
+messaging technologies over the years, but one of them is always pretty easy to 
+get up and running which is <a href="https://www.rabbitmq.com" target="_blank">
+RabbitMQ</a></p>
+<p><a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> has a whole 
+bunch of clients, including a Java one and a .NET one. Our use case is Scala to 
+.NET, but since Scala is a JVM targetted language we can make use of the Java
+<a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> client.&nbsp;
+</p>
+<p>So in essence this article is about how to get Scala code to talk to .NET 
+code and vice versa. I have chosen to use <strong>JSON</strong> as the message 
+format that I will use. I did this a most languages have a number of different 
+JSON libaries, and it is a nice light weight format. </p>
+<p>&nbsp;</p>
+&nbsp;<h1>Common Prerequisites</h1>
+<p>There are a couple of things that both sides need for the demo app to work 
+correctly, as well as some specific thing (well only one actually, the JSON 
+serializer library). So this section outlines the common prerequisites and the 
+actual .NET / Scala sections of this article outline what is needed for the 
+specific languages.</p>
+<p>&nbsp;</p>
+<p>However like I say both side make use of RabbitMQ, and as such that needs to 
+be installed and running. So you will need to install the following things to 
+get RabbitMQ to work</p>
+<ol>
+	<li>Erlang OTP :
+	<a href="http://www.erlang.org/download.html" target="_blank">
+	http://www.erlang.org/download.html</a></li>
+	<li>RabbitMQ :
+	<a href="https://www.rabbitmq.com/download.html" target="_blank">
+	https://www.rabbitmq.com/download.html</a></li>
+</ol>
+<p>&nbsp;</p>
+<p>One you have installed these things it is a good idea to ensure that the 
+following things are done</p>
+<ol>
+	<li>Make sure RabbitMQ is setup to run as a Automatically starting service. 
+	The service name should be &quot;RabbitMQ&quot;</li>
+	<li>Make sure that the RabbitMQ web management plugin has been installed and 
+	is working. There is an article on how to do that here
+	<a href="https://www.rabbitmq.com/management.html" target="_blank">
+	https://www.rabbitmq.com/management.html</a></li>
+</ol>
+<div style="margin-left:40px">
+<p>One you have done that you should be able to check the 
+web management plugin via the following Url :
+<a href="http://localhost:15672/#/" target="_blank">http://localhost:15672/#/</a></p>
+<p>Which should show you something like this:</p>
+<p>&nbsp;</p>
+<p><a href="RabbitWebBig.png"><img alt="" height="556" src="RabbitWeb.png" width="530"></a></p>
+<p><i>CLICK FOR LARGER IMAGE</i></p>
+</div>
+
+&nbsp;<h1>&nbsp;</h1>
+<h1>Where Is The Code</h1>
+<p>The code is available right here at my GitHub account :</p>
+<p>
+<a href="https://github.com/sachabarber/ScalaToDotNetInteropUsingRabbitMq" target="_blank">
+https://github.com/sachabarber/ScalaToDotNetInteropUsingRabbitMq</a></p>
+<p>
+&nbsp;</p>
+<p>
+&nbsp;</p>
+&nbsp;<h1>The Demo App</h1>
+<p>The demo app is made up of the following</p>
+<ul>
+	<li>A single VS2013 solution for the .NET side</li>
+	<li>2 different IntelliJ IDEA projects<ul>
+		<li>Scala Publisher</li>
+		<li>Scala Subscriber</li>
+	</ul>
+	</li>
+</ul>
+<p>&nbsp;</p>
+<div style="background:yellow; border:3px black solid; margin:10px; padding:10px">
+<p><strong>IMPORTANT NOTE</strong></p>
+<p>The demo apps are the bare metal parts of what you need to get .NET to talk 
+to Scala and Vice Versa. This is not production ready at all. There is no 
+Exception handling at all, so please treat it for what it is, a demo.</p>
+</div>
+<p>&nbsp;</p>
+<p>The following table illustrates the scenarios that I have personally tested 
+(if the arrows seem a bit sketchy to you, you would be right, I forgot to make 
+those bad boys one way in word (diagramming tool of champions), so had to touch 
+them up in&nbsp; paint .NET so please forgive me)</p>
+<p>&nbsp;</p>
+<table style="width: 80%" border="1px solid black">
+	<tr>
+		<td style="border: solid; width: 583px">
+			<a href="DotNetPubSubBig.png">
+				<p>
+					<img alt="" height="187" src="DotNetPubSub.png" width="530">
+					<br/>
+					<i>CLICK FOR BIGGER IMAGE</i>
+				</p>
+			</a>
+		</td>
+		<td style="border: solid; width: 80%; background-color: #C0C0C0;">.NET publisher to .NET Subscriber</td>
+	</tr>
+	<tr>
+		<td style="border: solid; width: 583px">
+			<a href="ScalaPubSubBig.png">
+				<p>
+					<img alt="" height="196" src="ScalaPubSub.png" width="530">
+					<br/>
+					<i>CLICK FOR BIGGER IMAGE</i>
+				</p>
+
+			</a>
+		</td>
+		<td style="border: solid; width: 80%; background-color: #C0C0C0;">Scala publisher to Scala Subscriber</td>
+	</tr>
+	<tr>
+		<td style="border: solid; width: 583px">
+			<a href="DotNetPubScalaSubBig.png">
+				<p>
+					<img alt="" height="196" src="DotNetPubScalaSub.png" width="530">
+					<br/>
+					<i>CLICK FOR BIGGER IMAGE</i>
+				</p>
+			</a>
+		</td>
+		<td style="border: solid; width: 80%; background-color: #C0C0C0;">.NET publisher to Scala Subscriber</td>
+	</tr>
+	<tr>
+		<td style="border: solid; width: 583px">
+			<a href="ScalaPubDotNetSubBig.png">
+				<p>
+					<img alt="" height="196" src="ScalaPubDotNetSub.png" width="530">
+					<br/>
+					<i>CLICK FOR BIGGER IMAGE</i>
+				</p>
+			</a>
+		</td>
+		<td style="border-style: solid; width: 80%; background-color: #C0C0C0;">Scala Publisher to .NET Subscriber</td>
+	</tr>
+</table>
+<p>&nbsp;</p>
+<p>The general idea is as follows:</p>
+<ul>
+	<li>We will use <a href="https://www.rabbitmq.com" target="_blank">
+RabbitMQ</a> to communicate cross process</li>
+	<li>We will use <a href="https://www.rabbitmq.com" target="_blank">
+RabbitMQ</a> headers to pass an Int value which indicates the type of the 
+	message being sent, such that the subsriber knows how to deserialize the 
+	message data being received </li>
+	<li>The message body itself will be JSON</li>
+</ul>
+<p>&nbsp;</p>
+<p>Here are some screen shots of things working</p>
+<p>&nbsp;</p>
+<p><strong>Scala Publisher -&gt; .NET Subscriber</strong></p>
+<p><a href="ScalaTalkingToDotNetBig_Running.png"><img alt="" height="298" src="ScalaTalkingToDotNet_Running.png" width="530"></a></p>
+<p><em>CLICK FOR BIGGER IMAGE</em></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>.NET Publisher -&gt; Scala Subscriber</strong></p>
+<p><a href="DotNetTalkingToScalaBig_Running.png"><img alt="" height="298" src="DotNetTalkingToScala_Running.png" width="530"></a></p>
+<p><em>CLICK FOR BIGGER IMAGE</em></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h2>The .NET Side</h2>
+<p>This section outlines how the .NET code works, and what you will need to get 
+it to work.</p>
+<p>&nbsp;</p>
+<p><strong>.NET Prequisites</strong></p>
+<ul>
+	<li>JSON .NET : This is used for JSON serialization, and can be installed 
+	via Nuget. Where the package name is <code>Newtonsoft.Json</code></li>
+	<li>RabbitMQ client : This simply uses the officially supported .NET client 
+	via Nuget. Where the package name is <code>RabbitMQ.Client</code></li>
+</ul>
+&nbsp;<h3>Common Message Data</h3>
+<p>For the demo app this simply data transfer object is used.</p>
+<pre lang="cs">
+public class Person
+{
+    [JsonProperty(PropertyName="age")]
+    public int Age { get; set; }
+
+    [JsonProperty(PropertyName = "name")]
+    public string Name { get; set; }
+
+    public override string ToString()
+    {
+        return string.Format("Name : {0}, Age : {1}", Name, Age);
+    }
+}</pre>
+<p>The more eagle eyed amongst you will see that I am using the <code>
+JsonProperty </code>attribute, to control the name of the serialized property. 
+We need to do this, as there is a convention in scala when using its equiavalent 
+of a property bag kind of class (case class), that the property names are lower 
+case.</p>
+<p>So we need to adjust for that somewhere, I chose to do this in the .NET side 
+as I am more familiar with JSON .Net then the Scala Play JSON library</p>
+<p>Without this control over the serialization the Scala Play JSON library fails 
+to deserialize .NET objects, as the casing is different.</p>
+<p>&nbsp;</p>
+<h3>The .NET Publisher</h3>
+<p>Here is the code for the .NET publisher code:</p>
+<pre lang="cs">
+using System;
+using RabbitMQ.Client;
+using System.Text;
+using Common;
+using Newtonsoft.Json;
+using RabbitMQ.Client.Framing;
+using System.Collections.Generic;
+using System.Threading;
+
+namespace Publisher
+{
+    class Program
+    {
+        public static void Main(string[] args)
+        {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.ExchangeDeclare(exchange: "logs", type: "fanout");
+
+                Random rand = new Random();
+
+
+                while (true)
+                {
+                    var message = GetMessage(rand);
+                    var body = Encoding.UTF8.GetBytes(message);
+
+                    var properties = new BasicProperties();
+                    properties.Headers = new Dictionary&lt;string, object&gt;();
+                    properties.Headers.Add("type", "1");
+
+                    channel.BasicPublish(exchange: "logs",
+                                         routingKey: "",
+                                         basicProperties: properties,
+                                         body: body);
+                    Console.WriteLine(" [x] Sent {0}", message);
+                    Thread.Sleep(1000);
+                }
+            }
+
+           
+            Console.ReadLine();
+        }
+
+        private static string GetMessage(Random rand)
+        {
+            Person p = new Person();
+            p.Age = rand.Next(100);
+            p.Name = string.Format("named from .NET {0}", p.Age);
+            return JsonConvert.SerializeObject(p);
+        }
+    }
+}
+</pre>
+<p>&nbsp;</p>
+<p>There are only a couple of points to note here:</p>
+<ol>
+	<li>We create a new <code>Person </code>which is serialized to JSON</li>
+	<li>We add a header value (Type = 1) to the 
+	<a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> headers 
+	collection. This enabled consumers to examine the headers to see how to 
+	treat the message data</li>
+	<li>We send the JSON serialized <code>Person </code>object using standard 
+	<a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> code</li>
+</ol>
+<p>&nbsp;</p>
+<h3>The .NET Subscriber</h3>
+<p>Here is the code for the .NET subscriber code:</p>
+<pre lang="cs">
+using System;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using System.Text;
+using System.Collections.Generic;
+using Common;
+using Newtonsoft.Json;
+
+namespace Subscriber
+{
+    class Program
+    {
+        public static void Main()
+        {
+            Dictionary&lt;int, Type&gt; typelookup = new Dictionary&lt;int, Type&gt;();
+            typelookup.Add(1, typeof(Person));
+
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.ExchangeDeclare(exchange: "logs", type: "fanout");
+
+                var queueName = channel.QueueDeclare().QueueName;
+                channel.QueueBind(queue: queueName,
+                                  exchange: "logs",
+                                  routingKey: "");
+
+                Console.WriteLine(" [*] Waiting for logs.");
+
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (model, ea) =&gt;
+                {
+                    var body = ea.Body;
+                    var typeToLookupBytes = (Byte[])ea.BasicProperties.Headers["type"];
+                    var typeToLookup = int.Parse(Encoding.UTF8.GetString(typeToLookupBytes));
+                    var messageType = typelookup[typeToLookup];
+                    var message = Encoding.UTF8.GetString(body);
+                    var person = JsonConvert.DeserializeObject(message, messageType);
+
+                    Console.WriteLine("[Recieved] message : {0}", person);
+                };
+                channel.BasicConsume(queue: queueName,
+                                     noAck: true,
+                                     consumer: consumer);
+
+                Console.WriteLine(" Press [enter] to exit.");
+                Console.ReadLine();
+            }
+        }
+    }
+}
+</pre>
+<p>There are only a couple of points to note here:</p>
+<ol>
+	<li>We hook up a standard 
+	<a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> consumer to 
+	listen for incoming messages</li>
+	<li>We first examin the headers to see what type of message we are receiving</li>
+	<li>We create a new <code>Person </code>by deserializinng the incoming 
+	message body (which is JSON serialized <code>Person </code>instance)</li>
+</ol>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+&nbsp;
+<h2>The Scala Side</h2>
+<p>This section outlines how the Scala code works, and what you will need to get 
+it to work.</p>
+<p>&nbsp;</p>
+<p><strong>Scala Prequisites</strong></p>
+<ul>
+	<li>
+	<a href="http://search.maven.org/#search%7Cga%7C1%7Cplay-json_2.11" target="_blank">
+	Play JSON library</a>, this can be installed via SBT</li>
+	<li>
+	<a href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.rabbitmq%22%20AND%20a%3A%22amqp-client%22" target="_blank">Official Java 
+	RabbitMQ library</a>, this can be installed via SBT</li>
+</ul>
+<p>&nbsp;</p>
+<p>Here is an example of the SBT file for the Scala Subscriber</p>
+<pre>
+<i>
+name := "Subscriber"
+
+version := "1.0"
+
+scalaVersion := "2.11.7"
+
+libraryDependencies ++= Seq(
+  "com.rabbitmq" % "amqp-client" % "3.5.5",
+  "com.typesafe.play" % "play-json_2.11" % "2.4.3"
+)
+</i>
+</pre>
+<p>&nbsp;</p>
+<h3>Common Message Data</h3>
+<p>For the demo app this simply data transfer object is used.</p>
+<pre lang="java">
+import play.api.libs.json.{JsPath, Json, Writes, Reads}
+import play.api.libs.functional.syntax._
+
+
+
+trait RabbitJsonMessage
+case class Person(name: String, age: Int) extends  RabbitJsonMessage
+{
+  override def toString : String = {
+    s"Name : $name, Age : $age"
+  }
+}
+
+object JsonImplicits {
+
+  implicit val personWrites = new Writes[Person] {
+    def writes(person: Person) = Json.obj(
+      "name" -&gt; person.name,
+      "age" -&gt; person.age
+    )
+  }
+
+  implicit val personReads : Reads[Person] = (
+    (JsPath \ "name").read[String] and
+      (JsPath \ "age").read[Int]
+    )(Person.apply _)
+}
+</pre>
+<p>&nbsp;</p>
+<p>This is a bit more complex than the simple JSON .Net code we saw on the .NET 
+side. This is largely down to how the
+<a href="https://www.playframework.com/documentation/2.2.x/ScalaJson" target="_blank">
+Play JSON</a> library works with Scala, where it requires you to use the <code>
+Reads/Writes</code> traits, which you make available using Scala implicit val, 
+as shown above.</p>
+<p>&nbsp;</p>
+<ul>
+	<li>The <code>Writes </code>trait (a trait is like an interface with some 
+	implementation) writes a <code>Person </code>case class to 
+	a <code>JsValue</code></li>
+	<li>The <code>Reads </code>trait reads into a <code>Person </code>case 
+	class from a <code>JsValue</code></li>
+</ul>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h3>The Scala Publisher</h3>
+<p>Here is the code for the Scala publisher code:</p>
+<pre lang="java">
+import com.rabbitmq.client._
+
+import java.util.HashMap
+import java.nio.charset.StandardCharsets
+
+import play.api.libs.json._
+
+import JsonImplicits ._
+
+
+
+object PublisherDemo {
+
+  def main (args:Array[String]):Unit = {
+    val r = new PublisherDemo ()
+    r.Send
+  }
+}
+
+
+
+
+class PublisherDemo {
+  val EXCHANGE_NAME = "logs"
+
+  def Send () = {
+
+    val factory = new ConnectionFactory()
+    factory.setHost("localhost")
+    val connection = factory.newConnection()
+    val channel = connection.createChannel()
+
+    channel.exchangeDeclare(EXCHANGE_NAME, "fanout")
+
+     for (i &lt;- (0 to 100)) {
+
+       val person = new Person("named from scala " + i.toString, i)
+       val message = Json.toJson(person)
+       val bytes =  message.toString.getBytes(StandardCharsets.UTF_8)
+       val headers = new HashMap[String,AnyRef]()
+       headers.putIfAbsent("type","1")
+
+
+       val props = new AMQP.BasicProperties.Builder().headers(headers)
+       channel.basicPublish(EXCHANGE_NAME,"",props.build() , bytes)
+       System.out.println(" [x] Sent '" + message + "'")
+       Thread.sleep(1000)
+    }
+    channel.close()
+    connection.close()
+  }
+}
+</pre>
+<p>&nbsp;</p>
+<p>There are only a couple of points to note here:</p>
+<ol>
+	<li>We create a new <code>Person </code>which is serialized to JSON</li>
+	<li>We add a header value (Type = 1) to the 
+	<a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> headers 
+	collection. This enabled consumers to examine the headers to see how to 
+	treat the message data</li>
+	<li>We send the JSON serialized <code>Person </code>object using standard 
+	<a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> code</li>
+</ol>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h3>The Scala Subscriber</h3>
+<p>Here is the code for the Scala subscriber code:</p>
+<pre lang="java">
+import java.util.HashMap
+import com.rabbitmq.client._
+import scala.reflect.ClassTag
+import scala.runtime.RichInt
+import scala.reflect.runtime.universe._
+import play.api.libs.json.{JsValue, Json, Writes}
+import JsonImplicits ._
+
+
+object SubscriberDemo {
+
+  def main (args:Array[String]): Unit = {
+    val r = new SubscriberDemo()
+    r.Receive()
+  }
+}
+
+
+class SubscriberDemo {
+  val EXCHANGE_NAME = "logs"
+
+  def Receive() = {
+
+      val factory = new ConnectionFactory()
+      factory.setHost("localhost")
+      val connection = factory.newConnection()
+      val channel = connection.createChannel()
+
+      channel.exchangeDeclare(EXCHANGE_NAME, "fanout")
+      val queueName = channel.queueDeclare().getQueue()
+      channel.queueBind(queueName, EXCHANGE_NAME, "")
+
+      val typelookup = new HashMap[Int, JsValue =&gt; RabbitJsonMessage]()
+      typelookup.putIfAbsent(1,value =&gt;
+      {
+          val person = Json.fromJson[Person](value).get
+          person.asInstanceOf[RabbitJsonMessage]
+      })
+
+      System.out.println(" [*] Waiting for messages. To exit press CTRL+C")
+      val consumer = new DefaultConsumer(channel) {
+
+
+      override def handleDelivery(consumerTag: String, envelope: Envelope, 
+		properties: AMQP.BasicProperties, body: scala.Array[scala.Byte] ) =
+      {
+          val typeToLookup = properties.getHeaders().get("type").toString().toInt
+          val jsonConverter = typelookup.get(typeToLookup)
+          val messageBody = new String(body, "UTF-8")
+          val jsonObject = Json.parse(messageBody)
+          val person = jsonConverter(jsonObject).asInstanceOf[Person]
+          System.out.println(" [x] Received '" + person + "'");
+      }
+
+    }
+    channel.basicConsume(queueName, true, consumer)
+
+  }
+}
+</pre>
+<p>There are only a couple of points to note here:</p>
+<ol>
+	<li>We hook up a standard 
+	<a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> consumer to 
+	listen for incoming messages</li>
+	<li>We first examin the headers to see what type of message we are receiving</li>
+	<li>We create a new <code>Person </code>by deserializinng the incoming 
+	message body (which is JSON serialized <code>Person </code>instance)</li>
+</ol>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+&nbsp;
+<h1>That's All<p>That is all I wanted to say this time, but if you like the article, and think it is useful, votes, comments are always welcome</p>

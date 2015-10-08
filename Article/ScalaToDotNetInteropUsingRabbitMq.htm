@@ -1,7 +1,33 @@
 
 
-<div id="TOC"></div>
-<h1>Introduction</h1>
+<ul>
+<li><a href="#Introduction">Introduction</a></li>
+
+<li><a href="#Where-Is-The-Code">Where Is The Code</a>
+<ul>
+<li><a href="#The-.NET-Side">The .NET Side</a>
+<ul>
+<li><a href="#The-.NET-Publisher">The .NET Publisher</a></li>
+
+<li><a href="#The-.NET-Subscriber">The .NET Subscriber</a></li>
+
+</ul>
+
+<li><a href="#The-Scala-Side">The Scala Side</a>
+<ul>
+<li><a href="#Common-Message-Data">Common Message Data</a></li>
+
+<li><a href="#The-Scala-Publisher">The Scala Publisher</a></li>
+
+<li><a href="#The-Scala-Subscriber">The Scala Subscriber</a></li>
+
+</ul>
+
+</ul>
+
+</ul>
+
+<h1><a name="Introduction" id="Introduction">Introduction</a></h1>
 <p>I have recently started a new job, where we are using a mixture of 
 technologies, lots of .NET, and the new stuff will be Scala based. We are using 
 Scala so that we can use the rich set of tools available for the JVM, such as 
@@ -89,7 +115,7 @@ web management plugin via the following Url :
 </div>
 
 &nbsp;<h1>&nbsp;</h1>
-<h1>Where Is The Code</h1>
+<h1><a name="Where-Is-The-Code" id="Where-Is-The-Code">Where Is The Code</a></h1>
 <p>The code is available right here at my GitHub account :</p>
 <p>
 <a href="https://github.com/sachabarber/ScalaToDotNetInteropUsingRabbitMq" target="_blank">
@@ -196,7 +222,7 @@ RabbitMQ</a> headers to pass an Int value which indicates the type of the
 <p><em>CLICK FOR BIGGER IMAGE</em></p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
-<h2>The .NET Side</h2>
+<h2><a name="The-.NET-Side" id="The-.NET-Side">The .NET Side</a></h2>
 <p>This section outlines how the .NET code works, and what you will need to get 
 it to work.</p>
 <p>&nbsp;</p>
@@ -233,7 +259,7 @@ as I am more familiar with JSON .Net then the Scala Play JSON library</p>
 <p>Without this control over the serialization the Scala Play JSON library fails 
 to deserialize .NET objects, as the casing is different.</p>
 <p>&nbsp;</p>
-<h3>The .NET Publisher</h3>
+<h3><a name="The-.NET-Publisher" id="The-.NET-Publisher">The .NET Publisher</a></h3>
 <p>Here is the code for the .NET publisher code:</p>
 <pre lang="cs">
 using System;
@@ -304,7 +330,7 @@ namespace Publisher
 	<a href="https://www.rabbitmq.com" target="_blank">RabbitMQ</a> code</li>
 </ol>
 <p>&nbsp;</p>
-<h3>The .NET Subscriber</h3>
+<h3><a name="The-.NET-Subscriber" id="The-.NET-Subscriber">The .NET Subscriber</a></h3>
 <p>Here is the code for the .NET subscriber code:</p>
 <pre lang="cs">
 using System;
@@ -374,7 +400,7 @@ namespace Subscriber
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 &nbsp;
-<h2>The Scala Side</h2>
+<h2><a name="The-Scala-Side" id="The-Scala-Side">The Scala Side</a></h2>
 <p>This section outlines how the Scala code works, and what you will need to get 
 it to work.</p>
 <p>&nbsp;</p>
@@ -404,7 +430,7 @@ libraryDependencies ++= Seq(
 </i>
 </pre>
 <p>&nbsp;</p>
-<h3>Common Message Data</h3>
+<h3><a name="Common-Message-Data" id="Common-Message-Data">Common Message Data</a></h3>
 <p>For the demo app this simply data transfer object is used.</p>
 <pre lang="java">
 import play.api.libs.json.{JsPath, Json, Writes, Reads}
@@ -453,7 +479,7 @@ as shown above.</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
-<h3>The Scala Publisher</h3>
+<h3><a name="The-Scala-Publisher" id="The-Scala-Publisher">The Scala Publisher</a></h3>
 <p>Here is the code for the Scala publisher code:</p>
 <pre lang="java">
 import com.rabbitmq.client._
@@ -522,7 +548,7 @@ class PublisherDemo {
 </ol>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
-<h3>The Scala Subscriber</h3>
+<h3><a name="The-Scala-Subscriber" id="The-Scala-Subscriber">The Scala Subscriber</a></h3>
 <p>Here is the code for the Scala subscriber code:</p>
 <pre lang="java">
 import java.util.HashMap

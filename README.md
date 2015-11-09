@@ -7,4 +7,7 @@
 
 <p>It also uses the <a href="https://www.rabbitmq.com/" target="_blank">RabbitMQ</a> standard headers collection to send a header which tells the subscriber what type of message is being sent, such that it may deserialize it correctly.
 
+<p>You can read more about this over at codeproject where I wrote this up <a href="http://www.codeproject.com/Articles/1037532/NET-Scala-Interop-Using-RabbitMQ" target="_blank">http://www.codeproject.com/Articles/1037532/NET-Scala-Interop-Using-RabbitMQ</a>
+
+
 
